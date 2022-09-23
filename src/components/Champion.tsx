@@ -1,38 +1,52 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { AppContext } from '../context';
 import { Character } from '../types';
 import { toTitleCase } from '../utils/toUpperCase';
 
-const Champion = ({ champion }) => {
-  const { id, name, quote, image, thumbnail, universe, abilities, tags } =
-    champion;
-  const survivability = abilities.find(
-    (ability: { abilityName: String; abilityScore: Number }) =>
-      ability.abilityName === 'Survivability'
-  ).abilityScore;
-  const power = abilities.find(
-    (ability: { abilityName: String; abilityScore: Number }) =>
-      ability.abilityName === 'Power'
-  ).abilityScore;
-  const mobility = abilities.find(
-    (ability: { abilityName: String; abilityScore: Number }) =>
-      ability.abilityName === 'Mobility'
-  ).abilityScore;
-  const technique = abilities.find(
-    (ability: { abilityName: String; abilityScore: Number }) =>
-      ability.abilityName === 'Technique'
-  ).abilityScore;
-  const energy = abilities.find(
-    (ability: { abilityName: String; abilityScore: Number }) =>
-      ability.abilityName === 'Energy'
-  ).abilityScore;
+const Champion = ({ champion }: any) => {
+  const { abilities, tags } = champion;
+  const findAbility = (name: string) =>
+    abilities.find(
+      (ability: { abilityName: String; abilityScore: Number }) =>
+        ability.abilityName === name
+    ).abilityScore;
+  const survivability = findAbility('Survivability');
+  const power = findAbility('Power');
+  const mobility = findAbility('Survivability');
+  const technique = findAbility('Technique');
+  const energy = findAbility('Energy');
+
+  const appCtx = useContext(AppContext);
+
+  const checked = appCtx.champions.some(
+    (character) => JSON.stringify(character) === JSON.stringify(champion)
+  );
+
+  const handleClick = () => {
+    if (appCtx.champions.length > 5 && !checked) {
+      toast.error('You can only add up to 6 members to your Squad');
+      return;
+    }
+    if (!checked) {
+      appCtx.addChampion(champion);
+    } else {
+      appCtx.removeChampion(champion);
+    }
+  };
 
   return (
-    <tr key={champion.name} className="bg-white border h-[80px]">
+    <tr
+      key={champion.name}
+      className={`border h-[80px] ${checked ? 'bg-blue-100' : 'bg-white '}`}
+    >
       <th className="text-left pl-5">
         <div className="flex items-center gap-3">
           <input
             type="checkbox"
             className="w-[24px] h-[24px] accent-blue-700"
+            onChange={handleClick}
+            checked={checked}
           />
           <img
             className="rounded-full w-[40px] h-[40px] border border-sky-700"
